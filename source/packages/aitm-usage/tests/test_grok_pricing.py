@@ -215,3 +215,9 @@ def test_legacy_v1_revision_refuses_grok_provider():
     assert _decode(raw, Revision) == codex
     with pytest.raises(ValueError):
         _decode(raw.replace('"provider":"codex"', '"provider":"grok"'), Revision)
+
+
+
+def test_modeled_inventory_rejects_unknown_input_model():
+    unknown = replace(_grok_usage(), model=monitor_types.MonitorModel.UNKNOWN)
+    assert pricing.price_grok(unknown, _monitor_card()).availability is Availability.UNKNOWN
