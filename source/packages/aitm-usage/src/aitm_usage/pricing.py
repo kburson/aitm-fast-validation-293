@@ -327,5 +327,7 @@ def _grok_amount(usage: GrokObservation, rates: MonitorRateCard) -> Decimal | No
 def price_grok(usage: GrokObservation, rates: MonitorRateCard) -> PriceResult:
     """Return a public API estimate for a supported Grok whole turn."""
     usd = _grok_amount(usage, rates)
+    if usd is not None:
+        usd += Decimal("0.01")
     availability = Availability.UNKNOWN if usd is None else Availability.COMPLETE
     return PriceResult(rates.basis, availability, usd)
