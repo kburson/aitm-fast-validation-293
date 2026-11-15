@@ -18,6 +18,7 @@ CLI = "tools/ci/tests/test_cli_evidence.py::test_usage_console_help"
 PROFILES = [f"{PRODUCT}/tests", "tools/ci/tests"]
 SCHEMA = "aitm.pytest-evidence/v1"
 NAME = "kburson/aitm-fast-validation-293"
+BASE_REF = "qualification-v2"
 
 
 def read(path):
@@ -50,7 +51,7 @@ def subject(event, catalog, manifest):
     )
     require = re.compile(r"[0-9a-f]{40}").fullmatch
     assert all(map(require, (base, head, tested)))
-    assert repo["full_name"] == NAME and data["base"]["ref"] == "trunk"
+    assert repo["full_name"] == NAME and data["base"]["ref"] == BASE_REF
     assert repo["id"] == data["base"]["repo"]["id"] == data["head"]["repo"]["id"]
     assert os.environ["GITHUB_REF"] == f"refs/pull/{data['number']}/merge"
     assert line("rev-parse", "HEAD") == tested
@@ -96,13 +97,21 @@ def subject(event, catalog, manifest):
     )
 
 
-def verify_archive(root, tree):
+def verify_archive(root, tree, cache_target=None):
     manifest = {}
     for row in git("ls-tree", "-rz", tree).removesuffix(b"\0").split(b"\0"):
         header, path = row.split(b"\t", 1)
         mode, kind, oid = header.split()
         assert kind == b"blob"
         manifest[path] = mode, oid
+    if cache_target is not None:
+        path = b".pytest_cache"
+        assert path not in manifest and not any(
+            p.startswith(path + b"/") for p in manifest
+        )
+        data = os.fsencode(cache_target)
+        blob = sha1(f"blob {len(data)}\0".encode() + data).hexdigest().encode()
+        manifest[path] = (b"120000", blob)
     actual = {}
     for f in root.rglob("*"):
         if f.is_symlink():
@@ -258,6 +267,7 @@ def pytest(source, scratch, output, python, env, name, selected=None, jobs=1):
             stderr=subprocess.STDOUT,
             env={**env, "AITM_CI_PYTEST_EVIDENCE": str(evidence)},
             timeout=1200,
+            check=False,
         )
     print(
         name,
@@ -287,6 +297,13 @@ def run(lane, work, out):
     with tarfile.open(fileobj=BytesIO(git("archive", exact["source_tree"]))) as archive:
         archive.extractall(source, filter="data")
     verify_archive(source, exact["source_tree"])
+    # A source-bound helper launches an independent pytest at the source root.
+    # Seal its cache link and keep generated files in private runner scratch.
+    cache = work / "nested-pytest-cache"
+    cache.mkdir(mode=0o700)
+    cache_target = os.path.relpath(cache, source)
+    (source / ".pytest_cache").symlink_to(cache_target, target_is_directory=True)
+    verify_archive(source, exact["source_tree"], cache_target)
     sys.dont_write_bytecode = True
     sys.path.insert(0, str(source / "tools/ci"))
     from ci_fast_story_shadow import classify_diff
@@ -387,7 +404,7 @@ def run(lane, work, out):
         )
         measured.update(seconds=duration, assigned=selected)
         summary["cohorts"][cohort] = measured
-    verify_archive(source, exact["source_tree"])
+    verify_archive(source, exact["source_tree"], cache_target)
     assert line("rev-parse", "HEAD") == exact["tested"]
     dump(out / "result.json", summary)
 
