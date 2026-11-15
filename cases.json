@@ -1,0 +1,62 @@
+{
+  "cases": {
+    "docs-add": {
+      "after": "08b7ba323badab99a8530ebfbd76bbeecc1e6b43",
+      "before": null,
+      "known_failures": [],
+      "mode": "selected",
+      "new_ids": [],
+      "path": "docs/fast-story-measurement-probe.md"
+    },
+    "docs-edit": {
+      "after": "3edcdbb17321c8fc2b8b9f1f44caf05cc8ffd6ea",
+      "before": "41d2661314f7ccfe6c52043bc0d38dc9a09fe502",
+      "known_failures": [],
+      "mode": "selected",
+      "new_ids": [],
+      "path": "docs/ci.md"
+    },
+    "fixture-equivalent": {
+      "after": "c849606b0ddfd06dbdac1ebb2d6f2f5c6bf1af06",
+      "before": "0ef1ee1ec5e78ecaabdaa969ff028fdd34576938",
+      "known_failures": [],
+      "mode": "selected",
+      "new_ids": [],
+      "path": "packages/aitm-usage/tests/fixtures/grok/headless.json"
+    },
+    "fixture-regression": {
+      "after": "3dd46268799f91fed22619954eb6757637692bdb",
+      "before": "0ef1ee1ec5e78ecaabdaa969ff028fdd34576938",
+      "known_failures": [
+        "packages/aitm-usage/tests/test_grok.py::test_headless_projection_is_only_corroboration"
+      ],
+      "mode": "selected",
+      "new_ids": [],
+      "path": "packages/aitm-usage/tests/fixtures/grok/headless.json"
+    },
+    "source-regression": {
+      "after": "e805e27fa6b79d6974af3b673729200a8c957b91",
+      "before": "6fb839c2fe36eb3f2c64bdc79d523bfde7417beb",
+      "known_failures": [
+        "packages/aitm-usage/tests/test_grok_pricing.py::test_grok_rate_classes_do_not_use_claude_defaults"
+      ],
+      "mode": "full-required",
+      "new_ids": [],
+      "path": "packages/aitm-usage/src/aitm_usage/pricing.py"
+    },
+    "test-inventory-add": {
+      "after": "4752fb158790bfc2325a280bef4145b1b46bd8d6",
+      "before": "f3f31e2ac78a949eb1d18f9b0d4285c2f8e264cf",
+      "known_failures": [],
+      "mode": "full-required",
+      "new_ids": [
+        "packages/aitm-usage/tests/test_grok_pricing.py::test_modeled_inventory_rejects_unknown_input_model"
+      ],
+      "path": "packages/aitm-usage/tests/test_grok_pricing.py"
+    }
+  },
+  "fixture_consumer": "packages/aitm-usage/tests/test_grok.py",
+  "fixture_path": "packages/aitm-usage/tests/fixtures/grok/headless.json",
+  "source_sha": "75d4bc06657f93f77d6b07e3ae2605cb1c9a269f",
+  "source_tree": "21a95846c7efbf7a4709dfcb1b0ce2e1b54baecb"
+}
